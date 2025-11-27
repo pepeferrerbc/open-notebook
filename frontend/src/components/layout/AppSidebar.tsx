@@ -22,9 +22,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from '@/components/common/ThemeToggle'
-import { AddSourceDialog } from '@/components/sources/AddSourceDialog'
-import { CreateNotebookDialog } from '@/components/notebooks/CreateNotebookDialog'
-import { GeneratePodcastDialog } from '@/components/podcasts/GeneratePodcastDialog'
 import { Separator } from '@/components/ui/separator'
 import {
   Book,
@@ -39,6 +36,7 @@ import {
   FileText,
   Plus,
   Wrench,
+  Command,
 } from 'lucide-react'
 
 const navigation = [
@@ -74,25 +72,32 @@ const navigation = [
 
 type CreateTarget = 'source' | 'notebook' | 'podcast'
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onCreateSource: () => void
+  onCreateNotebook: () => void
+  onCreatePodcast: () => void
+}
+
+export function AppSidebar({
+  onCreateSource,
+  onCreateNotebook,
+  onCreatePodcast,
+}: AppSidebarProps) {
   const pathname = usePathname()
   const { logout } = useAuth()
   const { isCollapsed, toggleCollapse } = useSidebarStore()
 
   const [createMenuOpen, setCreateMenuOpen] = useState(false)
-  const [sourceDialogOpen, setSourceDialogOpen] = useState(false)
-  const [notebookDialogOpen, setNotebookDialogOpen] = useState(false)
-  const [podcastDialogOpen, setPodcastDialogOpen] = useState(false)
 
   const handleCreateSelection = (target: CreateTarget) => {
     setCreateMenuOpen(false)
 
     if (target === 'source') {
-      setSourceDialogOpen(true)
+      onCreateSource()
     } else if (target === 'notebook') {
-      setNotebookDialogOpen(true)
+      onCreateNotebook()
     } else if (target === 'podcast') {
-      setPodcastDialogOpen(true)
+      onCreatePodcast()
     }
   }
 
@@ -289,6 +294,19 @@ export function AppSidebar() {
             isCollapsed && 'px-2'
           )}
         >
+          {/* Command Palette hint */}
+          {!isCollapsed && (
+            <div className="flex items-center justify-between px-3 py-1.5 text-xs text-sidebar-foreground/60">
+              <span className="flex items-center gap-1.5">
+                <Command className="h-3 w-3" />
+                Quick actions
+              </span>
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </div>
+          )}
+
           <div
             className={cn(
               'flex',
@@ -334,16 +352,6 @@ export function AppSidebar() {
           )}
         </div>
       </div>
-
-      <AddSourceDialog open={sourceDialogOpen} onOpenChange={setSourceDialogOpen} />
-      <CreateNotebookDialog
-        open={notebookDialogOpen}
-        onOpenChange={setNotebookDialogOpen}
-      />
-      <GeneratePodcastDialog
-        open={podcastDialogOpen}
-        onOpenChange={setPodcastDialogOpen}
-      />
     </TooltipProvider>
   )
 }
